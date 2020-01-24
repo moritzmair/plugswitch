@@ -9,6 +9,7 @@
   "author": "Moritz Mair",
   "license": "ISC",
   "dependencies": {
-    "fritzapi": "^0.10.7"
+    "fritzapi": "^0.10.7",
+    "node-fetch": "^2.6.0"
   }
 }
