@@ -1,0 +1,14 @@
+{
+  "name": "plugswitch",
+  "version": "1.0.0",
+  "description": "Uses the awattar api to switch smart home plugs from fritz box",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Moritz Mair",
+  "license": "ISC",
+  "dependencies": {
+    "fritzapi": "^0.10.7"
+  }
+}
