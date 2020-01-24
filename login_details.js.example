@@ -1,0 +1,4 @@
+//login details for the fritzbox
+exports.user = 'youruser';
+exports.password = 'yourpassword';
+exports.ip = '192.168.178.1';
