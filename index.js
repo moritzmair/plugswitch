@@ -45,12 +45,12 @@ function decide_switch(marketprice){
     fritz.getDeviceList(sid).then(function(list){
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
-        if(marketprice < price_threshold || current_hour == 2 || current_hour == 3 || current_hour == 4 && switch_state == 0){
+        if((marketprice < price_threshold || current_hour == 2 || current_hour == 3 || current_hour == 4) && switch_state == 0){
           turn_switch(sid, list[i].identifier, 1);
           send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
           console.log('switched on '+list[i].name);
         }
-        if(marketprice > price_threshold+1 && current_hour != 2 && current_hour != 3 && current_hour != 4 && switch_state == 1){
+        if((marketprice > price_threshold+1 && current_hour != 2 && current_hour != 3 && current_hour != 4) && switch_state == 1){
           turn_switch(sid, list[i].identifier, 0);
           send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
           console.log('switched off '+list[i].name);
