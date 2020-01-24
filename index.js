@@ -1,6 +1,10 @@
 const https = require('https');
 const fetch = require("node-fetch");
 
+if(typeof URLSearchParams === 'undefined'){
+  URLSearchParams = require('url').URLSearchParams;
+}
+
 var login_data = require('./login_details.js');
 
 var fritz = require('fritzapi');
@@ -11,12 +15,12 @@ var d = new Date();
 var current_hour = d.getHours();
 
 // if price falls below that threshold power outlets will be switched on
-var price_threshold = 40 // in cents*10
+var price_threshold = 50 // in cents*10
 var basic_rate =  19.82 + 0.25// in cents
 
 perform_request();
 
-setInterval(function(){ perform_request(); }, 10*1000*60);
+setInterval(function(){ perform_request(); }, 12*1000*60);
 
 function perform_request(){
   https.get(url, function(res){
@@ -44,10 +48,12 @@ function decide_switch(marketprice){
         if(marketprice < price_threshold || current_hour == 2 || current_hour == 3 || current_hour == 4 && switch_state == 0){
           turn_switch(sid, list[i].identifier, 1);
           send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+          console.log('switched on '+list[i].name);
         }
         if(marketprice > price_threshold+1 && current_hour != 2 && current_hour != 3 && current_hour != 4 && switch_state == 1){
           turn_switch(sid, list[i].identifier, 0);
           send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+          console.log('switched off '+list[i].name);
         }
       }
     });
