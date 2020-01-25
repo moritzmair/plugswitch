@@ -11,11 +11,12 @@ if(typeof URLSearchParams === 'undefined'){
 
 var config_file = require('./config.js');
 
-var webserver = require('./webserver.js');
+var Webserver = require('./webserver.js');
 
 var device_list = new Object;
 
-webserver.start(config_file, device_list);
+server = new Webserver(config_file)
+server.start();
 
 var fritz = require('fritzapi');
 
