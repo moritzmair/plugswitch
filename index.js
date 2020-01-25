@@ -73,7 +73,7 @@ function turn_switch(sid, identifier, state){
 
 function send_notification_telegram(msg,price){
   const params = new URLSearchParams();
-  params.append('secret', config_file.iot_bot_secret);
+  params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
