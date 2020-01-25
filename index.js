@@ -11,6 +11,9 @@ if(typeof URLSearchParams === 'undefined'){
 
 var config_file = require('./config.js');
 
+var webserver = require('./webserver.js');
+webserver.start(config_file);
+
 var fritz = require('fritzapi');
 
 var url = 'https://api.awattar.de/v1/marketdata';
