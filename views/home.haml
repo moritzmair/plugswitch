@@ -1,6 +1,27 @@
-%html
+%html.h-100{lang:"en"}
   %head
     %title Switchplug Webinterface
-  %body
-    Price threshold:
-    = config.price_threshold
+    %link{rel:"stylesheet", href:"/css/bootstrap.min.css"}
+  %body.h-100.d-flex.flex-column
+    .container
+      %h1.mt-5 Switchplug Webinterface
+      %p This site provides an overview over the configuration to switch the fritz plugs by awattar hourly price
+      %table.table
+        %tr
+          %td Price threshold
+          %td= config.price_threshold
+        %tr
+          %td Basic rate
+          %td= config.basic_rate
+        %tr
+          %td User name for fritz.box
+          %td= config.user
+      =list
+    .footer.mt-auto.py-3
+      .container
+        %span.text-muted
+          Maintained by
+          %a{href: "https://t.me/Master92"} Moritz Mair
+          . For contributing please make a pull request on
+          %a{href: "https://github.com/moritzmair/plugswitch"} Github
+          .

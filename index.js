@@ -12,7 +12,10 @@ if(typeof URLSearchParams === 'undefined'){
 var config_file = require('./config.js');
 
 var webserver = require('./webserver.js');
-webserver.start(config_file);
+
+var device_list = new Object;
+
+webserver.start(config_file, device_list);
 
 var fritz = require('fritzapi');
 
@@ -23,6 +26,8 @@ var current_hour = d.getHours();
 
 var price_threshold = config_file.price_threshold * 10
 var basic_rate =  config_file.basic_rate
+
+
 
 perform_request();
 
@@ -49,6 +54,7 @@ function perform_request(){
 function decide_switch(marketprice){
   fritz.getSessionID(config_file.user, config_file.password).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
+      device_list = list
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
         if((marketprice < price_threshold || current_hour == 2 || current_hour == 3 || current_hour == 4) && switch_state == 0){
