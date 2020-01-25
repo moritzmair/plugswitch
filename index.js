@@ -1,3 +1,7 @@
+// Author: Moritz Mair
+// 
+// Please do not change anything in this file. Use the config.js file to configure
+
 const https = require('https');
 const fetch = require("node-fetch");
 
@@ -5,7 +9,7 @@ if(typeof URLSearchParams === 'undefined'){
   URLSearchParams = require('url').URLSearchParams;
 }
 
-var login_data = require('./login_details.js');
+var config_file = require('./config.js');
 
 var fritz = require('fritzapi');
 
@@ -14,9 +18,8 @@ var url = 'https://api.awattar.de/v1/marketdata';
 var d = new Date();
 var current_hour = d.getHours();
 
-// if price falls below that threshold power outlets will be switched on
-var price_threshold = 50 // in cents*10
-var basic_rate =  19.82 + 0.25// in cents
+var price_threshold = config_file.price_threshold * 10
+var basic_rate =  config_file.basic_rate
 
 perform_request();
 
@@ -41,7 +44,7 @@ function perform_request(){
 }
 
 function decide_switch(marketprice){
-  fritz.getSessionID(login_data.user, login_data.password).then(function(sid) {
+  fritz.getSessionID(config_file.user, config_file.password).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
@@ -70,7 +73,7 @@ function turn_switch(sid, identifier, state){
 
 function send_notification_telegram(msg,price){
   const params = new URLSearchParams();
-  params.append('secret', login_data.iot_bot_secret);
+  params.append('secret', config_file.iot_bot_secret);
   params.append('message', msg);
   fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }

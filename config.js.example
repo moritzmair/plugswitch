@@ -1,0 +1,8 @@
+//login details for the fritzbox
+exports.user = 'youruser';
+exports.password = 'yourpassword';
+exports.iot_bot_secret = 'insertsecretcodehere';
+
+// if price falls below that threshold power outlets will be switched on
+exports.price_threshold = 5 // in cents
+exports.basic_rate =  19.82 + 0.25// in cents

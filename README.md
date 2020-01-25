@@ -10,8 +10,8 @@ At the moment configuration is done completly manually. Will consider working on
 * git clone https://github.com/moritzmair/plugswitch.git
 * cd plugswitch
 * npm install
-* cp login_details.js.example login_details.js
-* nano login_details.js (enter your login data here)
+* cp config.js.example config.js
+* nano config.js (enter your login data here)
 
 ## Start Server
 * node index.js
@@ -23,3 +23,6 @@ It is a good idea to use this script on a raspberry pi, to run it you could use 
 * pm2 start index.js
 * pm2 save (to save that the line above should always be started on startup)
 * view logs with pm2 log
+
+## Found a bug/need a feature?
+Please use the Issue tracker on bitbucket: https://github.com/moritzmair/plugswitch/issues

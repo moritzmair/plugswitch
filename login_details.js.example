@@ -1,4 +1,0 @@
-//login details for the fritzbox
-exports.user = 'youruser';
-exports.password = 'yourpassword';
-exports.iot_bot_secret = 'insertsecretcodehere';
