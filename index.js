@@ -13,8 +13,6 @@ var config_file = require('./config.js');
 
 var Webserver = require('./webserver.js');
 
-var device_list = new Object;
-
 server = new Webserver(config_file)
 server.start();
 
@@ -45,17 +43,19 @@ function perform_request(){
     res.on('end', function(){
       var response = JSON.parse(body);
       console.log("Got a response: ", response.data[0]);
-      decide_switch(response.data[0].marketprice)
+      decide_switch(response)
     });
   }).on('error', function(e){
     console.log("Got an error: ", e);
   });
 }
 
-function decide_switch(marketprice){
+function decide_switch(awattar_response){
+  marketprice = awattar_response.data[0].marketprice
   fritz.getSessionID(config_file.user, config_file.password).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      device_list = list
+      console.log('sending list to server')
+      server.refresh_parameters(list, awattar_response)
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
         if((marketprice < price_threshold || current_hour == 2 || current_hour == 3 || current_hour == 4) && switch_state == 0){

@@ -1,8 +1,18 @@
+
 class Webserver {
   constructor(config) {
     this.config = config;
+  }
 
-    this.device_list = {}
+  refresh_parameters(list, awattar_response){
+    this.data = {
+      config: this.config,
+      list: list,
+      marketprice: awattar_response.data[0].marketprice,
+      awattar_data: awattar_response.data
+    };
+    this.server.close();
+    this.start();
   }
   
   start(){
@@ -14,10 +24,7 @@ class Webserver {
 
     const port = this.config.port_webserver
 
-    var data = {
-      config: this.config,
-      list: JSON.stringify(this.device_list)
-    };
+    const data = this.data
     
     app.get('/', function (req, res) {
       var hamlView = fs.readFileSync('views/home.haml', 'utf8');
@@ -26,7 +33,7 @@ class Webserver {
   
     app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
   
-    app.listen(port, () => console.log(`listening on port ${port}!`))
+    this.server = app.listen(port, () => console.log(`listening on port ${port}!`));
   }
 }
 

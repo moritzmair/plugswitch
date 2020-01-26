@@ -2,6 +2,7 @@
   %head
     %title Switchplug Webinterface
     %link{rel:"stylesheet", href:"/css/bootstrap.min.css"}
+    %meta{charset:"UTF-8"}
   %body.h-100.d-flex.flex-column
     .container
       %h1.mt-5 Switchplug Webinterface
@@ -9,14 +10,42 @@
       %table.table
         %tr
           %td Price threshold
-          %td= config.price_threshold
+          %td= config.price_threshold + ' cent'
         %tr
           %td Basic rate
-          %td= config.basic_rate
+          %td= config.basic_rate + ' cent'
         %tr
           %td User name for fritz.box
           %td= config.user
-      =list
+        %tr
+          %td Marketprice
+          %td=marketprice/10 + ' cent'
+      -for(var i = 0, len = list.length; i < len; i++)
+        %table.table
+          %tr
+            %th Name
+            %th=list[i]['name']
+          %tr
+            %td Identifier
+            %td=list[i]['identifier']
+          %tr
+            %td State
+            %td=list[i]['switch']['state']
+          %tr
+            %td Temperature
+            %td=list[i]['temperature']['celsius']/10 + ' °C'
+          %tr
+            %td Voltage
+            %td=list[i]['powermeter']['voltage']/1000 + ' V'
+          %tr
+            %td Power
+            %td=list[i]['powermeter']['power']/1000 + ' watts'
+
+      -for(var i = 0, len = awattar_data.length; i < len; i++)
+        -var price = (awattar_data[i].marketprice/10)*1.19+config.basic_rate
+        =new Date(awattar_data[i].start_timestamp)
+        .progress
+          .progress-bar{role:"progressbar", style:"width: "+(price*10)/3+"%;"}=Math.round(price*100)/100 + ' cent'
     .footer.mt-auto.py-3
       .container
         %span.text-muted
