@@ -4,12 +4,14 @@
 
 const https = require('https');
 const fetch = require("node-fetch");
+const fs = require('fs');
 
 if(typeof URLSearchParams === 'undefined'){
   URLSearchParams = require('url').URLSearchParams;
 }
 
-var config_file = require('./config.js');
+let rawdata = fs.readFileSync('config.json');
+let config_file = JSON.parse(rawdata);
 
 var Webserver = require('./webserver.js');
 
@@ -52,7 +54,7 @@ function perform_request(){
 
 function decide_switch(awattar_response){
   marketprice = awattar_response.data[0].marketprice
-  fritz.getSessionID(config_file.user, config_file.password).then(function(sid) {
+  fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
       server.refresh_parameters(list, awattar_response)
       for(var i = 0, len = list.length; i < len; i++){

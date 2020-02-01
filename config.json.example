@@ -1,0 +1,8 @@
+{
+  "fritzboxuser": "youruser",
+  "fritzboxpassword": "yourpassword",
+  "mercuriusbot_secret": "insertsecretcodehere",
+  "price_threshold": 2,
+  "basic_rate": 20,
+  "port_webserver": 8080
+}
