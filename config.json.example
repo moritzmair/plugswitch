@@ -2,7 +2,10 @@
   "fritzboxuser": "youruser",
   "fritzboxpassword": "yourpassword",
   "mercuriusbot_secret": "insertsecretcodehere",
-  "price_threshold": 2,
-  "basic_rate": 20,
+  "hours_to_turn_on": 3,
+  "hours_to_turn_on_after": 20,
+  "turn_on_until_24h": 4,
+  "always_turn_on_below": -5,
+  "basic_rate": 20.07,
   "port_webserver": 8080
 }
