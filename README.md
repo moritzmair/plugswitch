@@ -10,8 +10,8 @@ Using the fritzapi by andig -> https://github.com/andig/fritzapi
 * ```git clone https://github.com/moritzmair/plugswitch.git```
 * ```cd plugswitch```
 * ```npm install```
-* ```cp config.js.example config.js```
-* ```nano config.js``` (enter your login data here)
+* ```cp config.json.example config.json```
+* ```nano config.json``` (enter your login data here)
 
 ## Start Server
 * ```node index.js```
@@ -25,4 +25,4 @@ It is a good idea to use this script on a raspberry pi, to run it you could use 
 * view logs with ```pm2 log```
 
 ## Found a bug/need a feature?
-Please use the Issue tracker on bitbucket: https://github.com/moritzmair/plugswitch/issues
+Please use the Issue tracker on github: https://github.com/moritzmair/plugswitch/issues
