@@ -9,14 +9,23 @@
       %p This site provides an overview over the configuration to switch the fritz plugs by awattar hourly price
       %table.table
         %tr
+          %td Find cheapest price between
+          %td
+            = config.hours_to_turn_on_after + ' h'
+            and
+            = config.turn_on_until_24h + ' h'
+        %tr
+          %td Turn on for
+          %td= config.hours_to_turn_on + ' hours'
+        %tr
           %td Price threshold
-          %td= config.price_threshold + ' cent'
+          %td= config.always_turn_on_below + ' cent'
         %tr
           %td Basic rate
           %td= config.basic_rate + ' cent'
         %tr
           %td User name for fritz.box
-          %td= config.user
+          %td= config.fritzboxuser
         %tr
           %td Marketprice
           %td=marketprice/10 + ' cent'
