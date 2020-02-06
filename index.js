@@ -38,7 +38,7 @@ setInterval(function(){ decide_switch(); }, 1000*60);
 
 function decide_switch(){
   marketprice = find_current_marketprice();
-  console.log('test'+marketprice)
+  console.log('current marketprice: '+marketprice/10)
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
       server.refresh_parameters(list, epex_data, marketprice);
@@ -110,18 +110,23 @@ function identify_cheapest_hours(){
     do_not_turn_on_before.setDate(do_not_turn_on_before.getDate() + 1);
   }
 
-  console.log("needs to be full at " + needs_to_be_full);
   console.log("do not turn on before " + do_not_turn_on_before);
+  console.log("needs to be full at " + needs_to_be_full);
   
   for(var i = 0, len = epex_data.data.length; i < len; i++){
-    if(epex_data.data[i].start_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
+    if(epex_data.data[i].end_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
       var date = new Date(epex_data.data[i].start_timestamp);
+      console.log(date)
       remaining_epex.push(epex_data.data[i])
     }
   }
 
   remaining_epex = remaining_epex.sort(function(a, b){return a.marketprice - b.marketprice});
 
+  if(config_file.hours_to_turn_on > remaining_epex.length){
+    console.log('can only turn on for ' + remaining_epex.length + ' due to hours in config file or market data is not loaded yet')
+    config_file.hours_to_turn_on = remaining_epex.length;
+  }
   for(var i= 0; i < config_file.hours_to_turn_on; i++){
     var cheap_date = new Date(remaining_epex[i].start_timestamp)
     cheapest_hours.push(cheap_date.getHours());
