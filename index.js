@@ -80,8 +80,9 @@ function refresh_epex(){
 
     res.on('end', function(){
       var response = JSON.parse(body);
-      console.log("Got a new epec data: ", response.data);
+      console.log("refreshed epec data");
       epex_data = response;
+      decide_switch();
     });
   }).on('error', function(e){
     console.log("Got an error: ", e);
