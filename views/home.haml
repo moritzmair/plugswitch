@@ -11,14 +11,14 @@
         %tr
           %td Find cheapest price between
           %td
-            = config.hours_to_turn_on_after + ' h'
+            = config.hours_to_turn_on_after + 'h '
             and
-            = config.turn_on_until_24h + ' h'
+            = ' ' + config.turn_on_until_24h + 'h'
         %tr
           %td Turn on for
           %td= config.hours_to_turn_on + ' hours'
         %tr
-          %td Price threshold
+          %td Turn always on below
           %td= config.always_turn_on_below + ' cent'
         %tr
           %td Basic rate
