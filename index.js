@@ -34,31 +34,14 @@ var epex_data = new Object();
 
 refresh_epex();
 setInterval(function(){ refresh_epex(); }, 1000*60*60*5);
-setInterval(function(){ decide_switch(epex_data); }, 1000*60);
+setInterval(function(){ decide_switch(); }, 1000*60);
 
-function perform_request(){
-  https.get(url, function(res){
-    var body = '';
-
-    res.on('data', function(chunk){
-      body += chunk;
-    });
-
-    res.on('end', function(){
-      var response = JSON.parse(body);
-      console.log("Got a response: ", response.data[0]);
-      decide_switch(response)
-    });
-  }).on('error', function(e){
-    console.log("Got an error: ", e);
-  });
-}
-
-function decide_switch(awattar_response){
-  marketprice = awattar_response.data[0].marketprice
+function decide_switch(){
+  marketprice = find_current_marketprice();
+  console.log('test'+marketprice)
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      server.refresh_parameters(list, awattar_response)
+      server.refresh_parameters(list, epex_data);
       cheapest_hours = identify_cheapest_hours();
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
@@ -75,6 +58,16 @@ function decide_switch(awattar_response){
       }
     });
   });
+}
+
+function find_current_marketprice(){
+  current_timestamp = Date.now();
+  for(var i = 0, len = epex_data.data.length; i < len; i++){
+    if(epex_data.data[i].start_timestamp <= current_timestamp && epex_data.data[i].end_timestamp > current_timestamp){
+      return epex_data.data[i].marketprice;
+    }
+  }
+  return false;
 }
 
 function refresh_epex(){
