@@ -94,17 +94,27 @@ function identify_cheapest_hours(){
   remaining_epex = new Array();
   //get timestamp of next event where battery needs to be full
   var needs_to_be_full = new Date();
+  needs_to_be_full.setMinutes(0);
   if(d.getHours() <= config_file.turn_on_until_24h){
     needs_to_be_full.setHours(config_file.turn_on_until_24h);
   }else{
     needs_to_be_full.setHours(config_file.turn_on_until_24h);
     needs_to_be_full.setDate(needs_to_be_full.getDate() + 1);
   }
+  var do_not_turn_on_before = new Date();
+  do_not_turn_on_before.setMinutes(0);
+  if(d.getHours() <= config_file.hours_to_turn_on_after){
+    do_not_turn_on_before.setHours(config_file.hours_to_turn_on_after);
+  }else{
+    do_not_turn_on_before.setHours(config_file.hours_to_turn_on_after);
+    do_not_turn_on_before.setDate(do_not_turn_on_before.getDate() + 1);
+  }
 
-  console.log("needs to be full at " + needs_to_be_full)
+  console.log("needs to be full at " + needs_to_be_full);
+  console.log("do not turn on before " + do_not_turn_on_before);
   
   for(var i = 0, len = epex_data.data.length; i < len; i++){
-    if(epex_data.data[i].start_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > config_file.hours_to_turn_on_after){
+    if(epex_data.data[i].start_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
       var date = new Date(epex_data.data[i].start_timestamp);
       remaining_epex.push(epex_data.data[i])
     }
