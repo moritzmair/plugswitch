@@ -41,7 +41,7 @@ function decide_switch(){
   console.log('test'+marketprice)
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      server.refresh_parameters(list, epex_data);
+      server.refresh_parameters(list, epex_data, marketprice);
       cheapest_hours = identify_cheapest_hours();
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
