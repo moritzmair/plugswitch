@@ -24,7 +24,6 @@ var url = 'https://api.awattar.de/v1/marketdata';
 
 var d = new Date();
 var current_hour = d.getHours();
-current_hour = 22
 
 var price_threshold = config_file.always_turn_on_below*10;
 
@@ -152,5 +151,5 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
