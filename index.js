@@ -29,8 +29,6 @@ var price_threshold = config_file.always_turn_on_below*10;
 
 var epex_data = new Object();
 
-
-
 refresh_epex();
 setInterval(function(){ refresh_epex(); }, 1000*60*60*5);
 setInterval(function(){ decide_switch(); }, 1000*60);
@@ -151,5 +149,5 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
