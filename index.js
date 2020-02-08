@@ -24,8 +24,8 @@ var url = 'https://api.awattar.de/v1/marketdata';
 
 var d = new Date();
 var current_hour = d.getHours();
+current_hour = 22
 
-var basic_rate =  config_file.basic_rate;
 var price_threshold = config_file.always_turn_on_below*10;
 
 var epex_data = new Object();
@@ -45,14 +45,16 @@ function decide_switch(){
       cheapest_hours = identify_cheapest_hours();
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
-        if((marketprice < price_threshold || cheapest_hours.includes(current_hour)) && switch_state == 0){
-          turn_switch(sid, list[i].identifier, 1);
-          send_notification_telegram('Lade in folgenden Stunden: '+cheapest_hours.join(', ')+'\nSchalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
-          console.log('switched on '+list[i].name);
+        if(marketprice < price_threshold || cheapest_hours.includes(current_hour)){
+          if(switch_state == 0){
+            turn_switch(sid, list[i].identifier, 1);
+            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+            console.log('switched on '+list[i].name);
+          }
         }
-        else if((marketprice > price_threshold+1 && !cheapest_hours.includes(current_hour)) && switch_state == 1){
+        else if(switch_state == 1){
           turn_switch(sid, list[i].identifier, 0);
-          send_notification_telegram('Lade in folgenden Stunden: '+cheapest_hours.join(', ')+'\nSchalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10+basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
           console.log('switched off '+list[i].name);
         }
       }
@@ -83,6 +85,7 @@ function refresh_epex(){
       console.log("refreshed epec data");
       epex_data = response;
       decide_switch();
+      send_notification_telegram('Lade in folgenden Stunden: '+identify_cheapest_hours().join(', '));
     });
   }).on('error', function(e){
     console.log("Got an error: ", e);
@@ -116,7 +119,6 @@ function identify_cheapest_hours(){
   for(var i = 0, len = epex_data.data.length; i < len; i++){
     if(epex_data.data[i].end_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
       var date = new Date(epex_data.data[i].start_timestamp);
-      console.log(date)
       remaining_epex.push(epex_data.data[i])
     }
   }
@@ -145,9 +147,10 @@ function turn_switch(sid, identifier, state){
   }
 }
 
-function send_notification_telegram(msg,price){
+function send_notification_telegram(msg){
   const params = new URLSearchParams();
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
-  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  console.log('send via telegram: '+msg);
+  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
