@@ -40,8 +40,8 @@ function decide_switch(){
   console.log('current marketprice: '+marketprice/10)
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      server.refresh_parameters(list, epex_data, marketprice);
       cheapest_hours = identify_cheapest_hours();
+      server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
         if(marketprice < price_threshold || cheapest_hours.includes(current_hour)){
@@ -151,5 +151,5 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }

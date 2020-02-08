@@ -4,12 +4,13 @@ class Webserver {
     this.config = config;
   }
 
-  refresh_parameters(list, awattar_response, marketprice){
+  refresh_parameters(list, awattar_response, marketprice, cheapest_hours){
     this.data = {
       config: this.config,
       list: list,
       marketprice: marketprice,
-      awattar_data: awattar_response.data
+      awattar_data: awattar_response.data,
+      cheapest_hours: cheapest_hours
     };
     this.server.close();
     this.start();

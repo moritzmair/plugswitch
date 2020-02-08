@@ -50,11 +50,21 @@
             %td Power
             %td=list[i]['powermeter']['power']/1000 + ' watts'
 
+      %h2 Preisübersicht
+      In grün die billigsten Stunden, zu denen der Stecker eingeschaltet wird.
+      %br
+      %br
       -for(var i = 0, len = awattar_data.length; i < len; i++)
         -var price = (awattar_data[i].marketprice/10)*1.19+config.basic_rate
+        -var price_hour = new Date(awattar_data[i].start_timestamp)
+        -price_hour = price_hour.getHours()
+        -var now = new Date()
+        -var bar_color = 'blue'
+        -if(cheapest_hours.includes(price_hour))
+          -bar_color = 'green'
         =new Date(awattar_data[i].start_timestamp)
         .progress
-          .progress-bar{role:"progressbar", style:"width: "+(price*10)/3+"%;"}=Math.round(price*100)/100 + ' cent'
+          .progress-bar{role:"progressbar", style:"width: "+(price*10)/3+"%;background-color:"+bar_color}=Math.round(price*100)/100 + ' cent'
     .footer.mt-auto.py-3
       .container
         %span.text-muted
