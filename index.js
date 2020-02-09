@@ -6,6 +6,8 @@ const https = require('https');
 const fetch = require("node-fetch");
 const fs = require('fs');
 
+var cron = require('node-cron');
+
 if(typeof URLSearchParams === 'undefined'){
   URLSearchParams = require('url').URLSearchParams;
 }
@@ -29,16 +31,22 @@ var price_threshold = config_file.always_turn_on_below*10;
 
 var epex_data = new Object();
 
+var cheapest_hours = new Array();
+
 refresh_epex();
-setInterval(function(){ refresh_epex(); }, 1000*60*60*5);
+
+cron.schedule('12 14 * * *', () => {
+  // run every day at 14:12
+  refresh_epex();
+});
+
 setInterval(function(){ decide_switch(); }, 1000*60);
 
 function decide_switch(){
   marketprice = find_current_marketprice();
-  console.log('current marketprice: '+marketprice/10)
+  console.log('current epex price: ' + marketprice/10 + ' cent')
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      cheapest_hours = identify_cheapest_hours(Date.now()+60*60*6*1000);
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
@@ -90,10 +98,9 @@ function refresh_epex(){
 }
 
 function identify_cheapest_hours(now){
-  cheapest_hours = new Array();
   remaining_epex = new Array();
   date_now = new Date(now);
-  console.log('Zeit aktuell:' + date_now);
+
   //get timestamp of next event where battery needs to be full
   var needs_to_be_full = new Date(now);
   var hours_to_turn_on = config_file.hours_to_turn_on;
@@ -109,9 +116,11 @@ function identify_cheapest_hours(now){
   if(date_now.getHours() <= config_file.turn_on_until_24h){
     do_not_turn_on_before.setDate(do_not_turn_on_before.getDate() - 1);
   }
-
-  console.log("do not turn on before " + do_not_turn_on_before);
-  console.log("needs to be full at " + needs_to_be_full);
+  
+  console.log("turn on from");
+  console.log(do_not_turn_on_before);
+  console.log("until");
+  console.log(needs_to_be_full);
   
   for(var i = 0, len = epex_data.data.length; i < len; i++){
     if(epex_data.data[i].end_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
@@ -131,7 +140,7 @@ function identify_cheapest_hours(now){
     cheapest_hours.push(cheap_date.getHours());
   }
 
-  return cheapest_hours
+  return cheapest_hours;
 }
 
 function turn_switch(sid, identifier, state){
@@ -147,5 +156,5 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
