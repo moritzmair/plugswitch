@@ -48,9 +48,12 @@ function decide_switch(){
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
+      var man_turn_on_until = server.get_man_turn_on_until();
+      console.log('manually turn on until')
+      console.log(man_turn_on_until)
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
-        if(marketprice < price_threshold || cheapest_hours.includes(current_hour)){
+        if(marketprice < price_threshold || cheapest_hours.includes(current_hour) || man_turn_on_until > d){
           if(switch_state == 0){
             turn_switch(sid, list[i].identifier, 1);
             send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
@@ -157,4 +160,9 @@ function send_notification_telegram(msg){
   params.append('message', msg);
   console.log('send via telegram: '+msg);
   //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+}
+
+Date.prototype.addHours = function(h) {
+  this.setTime(this.getTime() + (h*60*60*1000));
+  return this;
 }

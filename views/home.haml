@@ -6,6 +6,28 @@
   %body.h-100.d-flex.flex-column
     .container
       %h1.mt-5 Switchplug Webinterface
+
+      -if(man_turn_on_until > new Date)
+        .badge.badge-success
+          Currently the plug is manually turned on until
+          = ' ' + man_turn_on_until
+        %br
+      %br
+      %form
+        Turn on for the next
+        %select{name: 'turn_on_hours'}
+          %option 1
+          %option 2
+          %option 3
+          %option 4
+          %option 5
+          %option 10
+          %option 20
+        hours.
+        %input{type: 'submit', value: 'start'}
+
+      %hr
+
       %p This site provides an overview over the configuration to switch the fritz plugs by awattar hourly price
       %table.table
         %tr
