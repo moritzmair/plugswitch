@@ -49,8 +49,6 @@ function decide_switch(){
     fritz.getDeviceList(sid).then(function(list){
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       var man_turn_on_until = server.get_man_turn_on_until();
-      console.log('manually turn on until')
-      console.log(man_turn_on_until)
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
         if(marketprice < price_threshold || cheapest_hours.includes(current_hour) || man_turn_on_until > d){
@@ -159,7 +157,7 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
 
 Date.prototype.addHours = function(h) {
