@@ -47,6 +47,7 @@ function decide_switch(){
   console.log('current epex price: ' + marketprice/10 + ' cent')
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
+      d = new Date();
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       var man_turn_on_until = server.get_man_turn_on_until();
       for(var i = 0, len = list.length; i < len; i++){
