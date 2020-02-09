@@ -1,6 +1,6 @@
 // Author: Moritz Mair
 // 
-// Please do not change anything in this file. Use the config.js file to configure
+// Please do not change anything in this file. Use the config.json file to configure
 
 const https = require('https');
 const fetch = require("node-fetch");
@@ -38,7 +38,7 @@ function decide_switch(){
   console.log('current marketprice: '+marketprice/10)
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      cheapest_hours = identify_cheapest_hours();
+      cheapest_hours = identify_cheapest_hours(Date.now()+60*60*6*1000);
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
@@ -82,32 +82,32 @@ function refresh_epex(){
       console.log("refreshed epec data");
       epex_data = response;
       decide_switch();
-      send_notification_telegram('Lade in folgenden Stunden: '+identify_cheapest_hours().join(', '));
+      send_notification_telegram('Lade in folgenden Stunden: '+identify_cheapest_hours(Date.now()).join(', '));
     });
   }).on('error', function(e){
     console.log("Got an error: ", e);
   });
 }
 
-function identify_cheapest_hours(){
+function identify_cheapest_hours(now){
   cheapest_hours = new Array();
   remaining_epex = new Array();
+  date_now = new Date(now);
+  console.log('Zeit aktuell:' + date_now);
   //get timestamp of next event where battery needs to be full
-  var needs_to_be_full = new Date();
+  var needs_to_be_full = new Date(now);
+  var hours_to_turn_on = config_file.hours_to_turn_on;
   needs_to_be_full.setMinutes(0);
-  if(d.getHours() <= config_file.turn_on_until_24h){
-    needs_to_be_full.setHours(config_file.turn_on_until_24h);
-  }else{
-    needs_to_be_full.setHours(config_file.turn_on_until_24h);
+  needs_to_be_full.setHours(config_file.turn_on_until_24h);
+  if(date_now.getHours() > config_file.turn_on_until_24h){
     needs_to_be_full.setDate(needs_to_be_full.getDate() + 1);
   }
-  var do_not_turn_on_before = new Date();
+  
+  var do_not_turn_on_before = new Date(now);
   do_not_turn_on_before.setMinutes(0);
-  if(d.getHours() <= config_file.hours_to_turn_on_after){
-    do_not_turn_on_before.setHours(config_file.hours_to_turn_on_after);
-  }else{
-    do_not_turn_on_before.setHours(config_file.hours_to_turn_on_after);
-    do_not_turn_on_before.setDate(do_not_turn_on_before.getDate() + 1);
+  do_not_turn_on_before.setHours(config_file.hours_to_turn_on_after);
+  if(date_now.getHours() <= config_file.turn_on_until_24h){
+    do_not_turn_on_before.setDate(do_not_turn_on_before.getDate() - 1);
   }
 
   console.log("do not turn on before " + do_not_turn_on_before);
@@ -115,23 +115,21 @@ function identify_cheapest_hours(){
   
   for(var i = 0, len = epex_data.data.length; i < len; i++){
     if(epex_data.data[i].end_timestamp < needs_to_be_full && epex_data.data[i].start_timestamp > do_not_turn_on_before){
-      var date = new Date(epex_data.data[i].start_timestamp);
       remaining_epex.push(epex_data.data[i])
     }
   }
 
   remaining_epex = remaining_epex.sort(function(a, b){return a.marketprice - b.marketprice});
 
-  if(config_file.hours_to_turn_on > remaining_epex.length){
+  if(hours_to_turn_on > remaining_epex.length){
     console.log('can only turn on for ' + remaining_epex.length + ' due to hours in config file or market data is not loaded yet')
-    config_file.hours_to_turn_on = remaining_epex.length;
+    hours_to_turn_on = remaining_epex.length;
   }
-  for(var i= 0; i < config_file.hours_to_turn_on; i++){
+  
+  for(var i= 0; i < hours_to_turn_on; i++){
     var cheap_date = new Date(remaining_epex[i].start_timestamp)
     cheapest_hours.push(cheap_date.getHours());
   }
-
-  console.log(cheapest_hours)
 
   return cheapest_hours
 }
