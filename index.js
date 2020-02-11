@@ -25,7 +25,6 @@ var fritz = require('fritzapi');
 var url = 'https://api.awattar.de/v1/marketdata';
 
 var d = new Date();
-var current_hour = d.getHours();
 
 var price_threshold = config_file.always_turn_on_below*10;
 
@@ -52,7 +51,7 @@ function decide_switch(){
       var man_turn_on_until = server.get_man_turn_on_until();
       for(var i = 0, len = list.length; i < len; i++){
         switch_state = list[i].switch.state;
-        if(marketprice < price_threshold || cheapest_hours.includes(parseInt(current_hour)) || man_turn_on_until > d){
+        if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
           if(switch_state == 0){
             turn_switch(sid, list[i].identifier, 1);
             send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
@@ -141,7 +140,7 @@ function identify_cheapest_hours(now){
   
   for(var i= 0; i < hours_to_turn_on; i++){
     var cheap_date = new Date(remaining_epex[i].start_timestamp)
-    cheapest_hours.push(parseInt(cheap_date.getHours()));
+    cheapest_hours.push(cheap_date.getHours());
   }
 
   return cheapest_hours;
