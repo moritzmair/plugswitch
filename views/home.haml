@@ -72,6 +72,9 @@
           %tr
             %td Power
             %td=list[i]['powermeter']['power']/1000 + ' watts'
+          %tr
+            %td Used Energy
+            %td=list[i]['powermeter']['energy']/1000 + ' kWh'
 
       %h2 Preisübersicht
       In grün die billigsten Stunden, zu denen der Stecker eingeschaltet wird.

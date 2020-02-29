@@ -46,13 +46,14 @@ function decide_switch(){
   marketprice = find_current_marketprice();
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
-      if(!config_file.fritz_ains.includes(list.identifier)){
-        return;
-      }
-      d = new Date();
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
+      d = new Date();
       var man_turn_on_until = server.get_man_turn_on_until();
       for(var i = 0, len = list.length; i < len; i++){
+        // only turn on/off devices that are defined in the config file
+        if(!config_file.fritz_ains.includes(list[i].identifier)){
+          continue;
+        }
         switch_state = list[i].switch.state;
         if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
           if(switch_state == 0){
