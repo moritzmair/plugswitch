@@ -2,6 +2,7 @@
   "fritzboxuser": "youruser",
   "fritzboxpassword": "yourpassword",
   "mercuriusbot_secret": "insertsecretcodehere",
+  "fritz_ains": ["ain1", "ain2"],
   "hours_to_turn_on": 3,
   "hours_to_turn_on_after": 18,
   "turn_on_until_24h": 4,

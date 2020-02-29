@@ -24,6 +24,7 @@ var fritz = require('fritzapi');
 
 var url = 'https://api.awattar.de/v1/marketdata';
 
+//can be deleted?
 var d = new Date();
 
 var price_threshold = config_file.always_turn_on_below*10;
@@ -43,9 +44,11 @@ setInterval(function(){ decide_switch(); }, 1000*60);
 
 function decide_switch(){
   marketprice = find_current_marketprice();
-  console.log('current epex price: ' + marketprice/10 + ' cent')
   fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
     fritz.getDeviceList(sid).then(function(list){
+      if(!config_file.fritz_ains.includes(list.identifier)){
+        return;
+      }
       d = new Date();
       server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
       var man_turn_on_until = server.get_man_turn_on_until();
@@ -54,14 +57,16 @@ function decide_switch(){
         if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
           if(switch_state == 0){
             turn_switch(sid, list[i].identifier, 1);
-            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10.0+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10.0)+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
             console.log('switched on '+list[i].name);
+            console.log(list);
           }
         }
         else if(switch_state == 1){
           turn_switch(sid, list[i].identifier, 0);
-          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10)+' Cent\nTemperatur '+list[i].temperature.celsius/10+' °C');
+          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10.0+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10.0)+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
           console.log('switched off '+list[i].name);
+          console.log(list);
         }
       }
     });
