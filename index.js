@@ -58,14 +58,14 @@ function decide_switch(){
         if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
           if(switch_state == 0){
             turn_switch(sid, list[i].identifier, 1);
-            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+(marketprice/10.0+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10.0)+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+((marketprice/10.0+config_file.basic_rate).toFixed(2))+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
             console.log('switched on '+list[i].name);
             console.log(list);
           }
         }
         else if(switch_state == 1){
           turn_switch(sid, list[i].identifier, 0);
-          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+(marketprice/10.0+config_file.basic_rate)+' Cent\nMarktpreis pro KWH: '+(marketprice/10.0)+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+((marketprice/10.0+config_file.basic_rate).toFixed(2))+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
           console.log('switched off '+list[i].name);
           console.log(list);
         }
