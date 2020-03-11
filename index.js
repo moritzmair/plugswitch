@@ -33,45 +33,69 @@ var epex_data = new Object();
 
 var cheapest_hours = new Array();
 
-refresh_epex();
+var sid = '';
+
+cron.schedule('59 * * * *', () => {
+  // run every hour
+  calculate_cost();
+});
 
 cron.schedule('12 14 * * *', () => {
   // run every day at 14:12
   refresh_epex();
 });
 
-setInterval(function(){ decide_switch(); }, 1000*60);
+//session id only needs to be loaded once because it will be kept alive by the decide switch method
+get_session_id();
+
+setTimeout(() => {
+  refresh_epex();
+}, 1000);
+
+setInterval(function(){
+  //decide_switch();
+  calculate_cost();
+}, 1000*60);
+
+
+function get_session_id(){
+  fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(session_id) {
+    sid = session_id;
+  });
+}
 
 function decide_switch(){
   marketprice = find_current_marketprice();
-  fritz.getSessionID(config_file.fritzboxuser, config_file.fritzboxpassword).then(function(sid) {
-    fritz.getDeviceList(sid).then(function(list){
-      server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
-      d = new Date();
-      var man_turn_on_until = server.get_man_turn_on_until();
-      for(var i = 0, len = list.length; i < len; i++){
-        // only turn on/off devices that are defined in the config file
-        if(!config_file.fritz_ains.includes(list[i].identifier)){
-          continue;
-        }
-        switch_state = list[i].switch.state;
-        if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
-          if(switch_state == 0){
-            turn_switch(sid, list[i].identifier, 1);
-            send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+((marketprice/10.0+config_file.basic_rate).toFixed(2))+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
-            console.log('switched on '+list[i].name);
-            console.log(list);
-          }
-        }
-        else if(switch_state == 1){
-          turn_switch(sid, list[i].identifier, 0);
-          send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+((marketprice/10.0+config_file.basic_rate).toFixed(2))+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
-          console.log('switched off '+list[i].name);
+  fritz.getDeviceList(sid).then(function(list){
+    server.refresh_parameters(list, epex_data, marketprice, cheapest_hours);
+    d = new Date();
+    var man_turn_on_until = server.get_man_turn_on_until();
+    for(var i = 0, len = list.length; i < len; i++){
+      // only turn on/off devices that are defined in the config file
+      if(!config_file.fritz_ains.includes(list[i].identifier)){
+        continue;
+      }
+      switch_state = list[i].switch.state;
+      if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
+        if(switch_state == 0){
+          turn_switch(sid, list[i].identifier, 1);
+          send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+kwh_price(marketprice)+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+          console.log('switched on '+list[i].name);
           console.log(list);
         }
       }
-    });
+      else if(switch_state == 1){
+        turn_switch(sid, list[i].identifier, 0);
+        send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+kwh_price(marketprice)+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+        console.log('switched off '+list[i].name);
+        console.log(list);
+      }
+    }
   });
+}
+
+function kwh_price(marketprice){
+  return (marketprice/10.0+config_file.basic_rate).toFixed(2)
 }
 
 function find_current_marketprice(){
@@ -97,6 +121,7 @@ function refresh_epex(){
       console.log("refreshed epec data");
       epex_data = response;
       decide_switch();
+      calculate_cost();
       send_notification_telegram('Lade in folgenden Stunden: '+identify_cheapest_hours(Date.now()).join(', '));
     });
   }).on('error', function(e){
@@ -165,10 +190,35 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
 
 Date.prototype.addHours = function(h) {
   this.setTime(this.getTime() + (h*60*60*1000));
   return this;
+}
+
+function calculate_cost(){
+  marketprice = find_current_marketprice();
+  fritz.getDeviceList(sid).then(function(list){
+    for(var i = 0, len = list.length; i < len; i++){
+      if(config_file[list[i].identifier] == undefined){
+        config_file[list[i].identifier] = new Object();
+      }
+      if(config_file[list[i].identifier]['last_readout'] == undefined){
+        config_file[list[i].identifier]['last_readout'] = 0;
+      }
+      energy_readout = list[i].powermeter.energy/1000;
+      energy_since_last_readout = energy_readout - config_file[list[i].identifier]['last_readout'];
+      cost_last_hour = energy_since_last_readout * kwh_price(marketprice);
+      config_file[list[i].identifier]['total_cost'] += cost_last_hour;
+      config_file[list[i].identifier]['last_readout'] = energy_readout;
+    }
+    save_config();
+  });
+}
+
+function save_config(){
+  let data = JSON.stringify(config_file, null, 2);
+  fs.writeFileSync('config.json', data);
 }
