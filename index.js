@@ -190,7 +190,7 @@ function send_notification_telegram(msg){
   params.append('secret', config_file.mercuriusbot_secret);
   params.append('message', msg);
   console.log('send via telegram: '+msg);
-  //fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
+  fetch('https://www.mercuriusbot.io/api/notify', { method: 'POST', body: params });
 }
 
 Date.prototype.addHours = function(h) {
