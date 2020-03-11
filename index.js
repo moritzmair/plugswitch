@@ -53,7 +53,7 @@ setTimeout(() => {
 }, 1000);
 
 setInterval(function(){
-  //decide_switch();
+  decide_switch();
   calculate_cost();
 }, 1000*60);
 
