@@ -79,14 +79,14 @@ function decide_switch(){
       if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
         if(switch_state == 0){
           turn_switch(sid, list[i].identifier, 1);
-          send_notification_telegram(generate_status_update(list[i], marketprice));
+          send_notification_telegram(generate_status_update(list[i], marketprice, 1));
           console.log('switched on '+list[i].name);
           console.log(list);
         }
       }
       else if(switch_state == 1){
         turn_switch(sid, list[i].identifier, 0);
-        send_notification_telegram(generate_status_update(list[i], marketprice));
+        send_notification_telegram(generate_status_update(list[i], marketprice, 0));
         console.log('switched off '+list[i].name);
         console.log(list);
       }
@@ -94,9 +94,9 @@ function decide_switch(){
   });
 }
 
-function generate_status_update(device, marketprice){
+function generate_status_update(device, marketprice, state){
   var status = '';
-  if(device.switch.state == 1){
+  if(state == 1){
     status = 'ein';
   }else{
     status = 'aus';
