@@ -77,7 +77,7 @@
             %td=list[i]['powermeter']['energy']/1000 + ' kWh'
           %tr
             %td Total cost
-            %td=config[list[i]['identifier']]['total_cost'] + ' €'
+            %td=(config[list[i]['identifier']]['total_cost']/100).toFixed(2) + ' €'
 
       %h2 Preisübersicht
       In grün die billigsten Stunden, zu denen der Stecker eingeschaltet wird.

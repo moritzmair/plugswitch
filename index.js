@@ -79,19 +79,36 @@ function decide_switch(){
       if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
         if(switch_state == 0){
           turn_switch(sid, list[i].identifier, 1);
-          send_notification_telegram('Schalte '+list[i].name+' ein\nPreis pro KWH: '+kwh_price(marketprice)+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+          send_notification_telegram(generate_status_update(list[i], marketprice));
           console.log('switched on '+list[i].name);
           console.log(list);
         }
       }
       else if(switch_state == 1){
         turn_switch(sid, list[i].identifier, 0);
-        send_notification_telegram('Schalte '+list[i].name+' aus\nPreis pro KWH: '+kwh_price(marketprice)+' Cent\nMarktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\nTemperatur: '+list[i].temperature.celsius/10+' °C\nGesamtverbrauch bisher: '+list[i].powermeter.energy/1000+' KWH');
+        send_notification_telegram(generate_status_update(list[i], marketprice));
         console.log('switched off '+list[i].name);
         console.log(list);
       }
     }
   });
+}
+
+function generate_status_update(device, marketprice){
+  var status = '';
+  if(device.switch.state == 1){
+    status = 'ein';
+  }else{
+    status = 'aus';
+  }
+  
+  var content = 'Schalte '+device.name+' '+status+'\n'
+  content += 'Preis pro KWH: '+kwh_price(marketprice)+' Cent\n';
+  content += 'Marktpreis pro KWH: '+((marketprice/10.0).toFixed(2))+' Cent\n';
+  content += 'Temperatur: '+device.temperature.celsius/10+' °C\n';
+  content += 'Gesamtverbrauch bisher: '+(device.powermeter.energy/1000).toFixed(2)+' KWH\n';
+  content += 'Gesamtkosten bisher: '+(config_file[device['identifier']]['total_cost']/100).toFixed(2) + ' €';
+  return content;
 }
 
 function kwh_price(marketprice){
