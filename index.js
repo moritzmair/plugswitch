@@ -75,6 +75,10 @@ function decide_switch(){
       if(!config_file.fritz_ains.includes(list[i].identifier)){
         continue;
       }
+      if(list[i].present == 0){
+        console.log('device ' + list[i].name + ' is currently not available');
+        continue;
+      }
       switch_state = list[i].switch.state;
       if(marketprice < price_threshold || cheapest_hours.includes(d.getHours()) || man_turn_on_until > d){
         if(switch_state == 0){
