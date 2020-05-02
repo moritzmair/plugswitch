@@ -15,7 +15,7 @@ class Webserver {
       man_turn_on_until: this.data.man_turn_on_until
     };
     this.server.close();
-    this.start();
+    this.start_server();
   }
 
   get_man_turn_on_until(){
@@ -23,6 +23,11 @@ class Webserver {
   }
   
   start(){
+    console.log(`server will listen on port ${this.config.port_webserver}!`);
+    this.start_server();
+  }
+
+  start_server(){
     const haml = require('hamljs');
     const fs = require('fs');
 
@@ -47,7 +52,7 @@ class Webserver {
   
     app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
   
-    this.server = app.listen(port, () => console.log(`listening on port ${port}!`));
+    this.server = app.listen(port);
   }
 }
 
