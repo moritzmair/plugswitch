@@ -15,6 +15,6 @@
     "fs": "0.0.1-security",
     "hamljs": "^0.6.2",
     "node-cron": "^2.0.3",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.7"
   }
 }
