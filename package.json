@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.4.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "fritzapi": "^0.10.7",
     "fs": "0.0.1-security",
     "hamljs": "^0.6.2",
